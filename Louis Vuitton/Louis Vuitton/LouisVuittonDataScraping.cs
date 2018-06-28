@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using HtmlAgilityPack;
 
 namespace Louis_Vuitton
 {
@@ -15,6 +16,17 @@ namespace Louis_Vuitton
         public LouisForm()
         {
             InitializeComponent();
+        }
+
+        private void LouisForm_Load(object sender, EventArgs e)
+        {
+            //Using the HTML Agility NuGet
+            HtmlAgilityPack.HtmlWeb htmlWeb = new HtmlWeb();
+            HtmlAgilityPack.HtmlDocument webPage = htmlWeb.Load("https://uk.louisvuitton.com/eng-gb/women/handbags/_/N-2keomb.html");
+
+            HtmlAgilityPack.HtmlNodeCollection productNames = webPage.DocumentNode.SelectNodes("//div[@class='productName toMinimize']");
+
+
         }
     }
 }

@@ -38,6 +38,7 @@
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Name = "LouisForm";
             this.Text = "Louis Vuitton Data Scraping";
+            this.Load += new System.EventHandler(this.LouisForm_Load);
             this.ResumeLayout(false);
 
         }
