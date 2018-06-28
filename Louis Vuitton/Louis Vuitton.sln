@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2035
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Louis Vuitton", "Louis Vuitton\Louis Vuitton.csproj", "{DFA7C7C4-E919-4D45-83C9-CBCDA9300A53}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DFA7C7C4-E919-4D45-83C9-CBCDA9300A53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFA7C7C4-E919-4D45-83C9-CBCDA9300A53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFA7C7C4-E919-4D45-83C9-CBCDA9300A53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFA7C7C4-E919-4D45-83C9-CBCDA9300A53}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {90BA51F5-0929-4BD6-8F36-49CB5DDA16C6}
+	EndGlobalSection
+EndGlobal
