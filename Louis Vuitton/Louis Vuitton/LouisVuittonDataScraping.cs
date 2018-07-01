@@ -57,29 +57,26 @@ namespace Louis_Vuitton
                 handbags.ElementAt(i).ProductImage = handbags.ElementAt(i).ProductImage.Replace("{IMG_WIDTH}", "360");
                 handbags.ElementAt(i).ProductImage = handbags.ElementAt(i).ProductImage.Replace("{IMG_HEIGHT}", "360");
 
-                //Description
+                //Page Link
                 handbags.ElementAt(i).PageLink = "https://uk.louisvuitton.com/" + productPageLinks.ElementAt(i).Attributes["href"].Value;
+
+                //Description
+                webBrowser.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(JavaScriptLoaded);
+                while (!webSiteLoaded)
+                    Application.DoEvents();
+                var dom = (mshtml.IHTMLDocument3)webBrowser.Document.DomDocument;
+                string html = dom.documentElement.innerHTML;
+                webPage.LoadHtml(html);
+
                 webPage = htmlWeb.Load(handbags.ElementAt(i).PageLink);
                 HtmlAgilityPack.HtmlNode description = webPage.DocumentNode.SelectSingleNode("//*[@id='productDescriptionSeeMore']");
                 handbags.ElementAt(i).ProductDescription = description.InnerText;
 
                 //Availability
-
                 webBrowser.Navigate(handbags.ElementAt(i).PageLink);
+
                 //Out of Stock Link (for testing purposes)
                 //webBrowser.Navigate("https://uk.louisvuitton.com/eng-gb/products/pochette-metis-monogram-empreinte-nvprod630173v#M44072");
-
-                webBrowser.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(JavaScriptLoaded);
-                while (!webSiteLoaded)
-                {
-                    Application.DoEvents();
-                }
-                var dom = (mshtml.IHTMLDocument3)webBrowser.Document.DomDocument;
-                string html = dom.documentElement.innerHTML;
-                //webBrowser.
-                //string url = webBrowser.Url;
-                Uri url = webBrowser.Url;
-                webPage.LoadHtml(html);
                 
                 HtmlAgilityPack.HtmlNode availability = webPage.DocumentNode.SelectSingleNode("//div[@id='notInStock']");
                 if (availability.Attributes["class"].Value == "getIndexClass")
