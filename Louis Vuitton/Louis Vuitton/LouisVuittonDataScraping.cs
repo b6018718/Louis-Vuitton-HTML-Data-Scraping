@@ -60,6 +60,12 @@ namespace Louis_Vuitton
                 //Page Link
                 handbags.ElementAt(i).PageLink = "https://uk.louisvuitton.com/" + productPageLinks.ElementAt(i).Attributes["href"].Value;
 
+                //Navigate Browser for JavaScript
+                webBrowser.Navigate(handbags.ElementAt(i).PageLink);
+
+                //Out of Stock (For Testing Purposes)
+                //webBrowser.Navigate("https://uk.louisvuitton.com/eng-gb/products/pochette-metis-monogram-empreinte-nvprod630173v#M44072");
+
                 //Description
                 webBrowser.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(JavaScriptLoaded);
                 while (!webSiteLoaded)
@@ -68,16 +74,10 @@ namespace Louis_Vuitton
                 string html = dom.documentElement.innerHTML;
                 webPage.LoadHtml(html);
 
-                webPage = htmlWeb.Load(handbags.ElementAt(i).PageLink);
                 HtmlAgilityPack.HtmlNode description = webPage.DocumentNode.SelectSingleNode("//*[@id='productDescriptionSeeMore']");
                 handbags.ElementAt(i).ProductDescription = description.InnerText;
 
                 //Availability
-                webBrowser.Navigate(handbags.ElementAt(i).PageLink);
-
-                //Out of Stock Link (for testing purposes)
-                //webBrowser.Navigate("https://uk.louisvuitton.com/eng-gb/products/pochette-metis-monogram-empreinte-nvprod630173v#M44072");
-                
                 HtmlAgilityPack.HtmlNode availability = webPage.DocumentNode.SelectSingleNode("//div[@id='notInStock']");
                 if (availability.Attributes["class"].Value == "getIndexClass")
                     handbags.ElementAt(i).Availability = "Currently out of stock online";
