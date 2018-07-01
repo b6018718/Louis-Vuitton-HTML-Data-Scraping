@@ -18,7 +18,9 @@ namespace Louis_Vuitton
             InitializeComponent();
         }
 
+
         bool webSiteLoaded = false;
+        WebBrowser webBrowser = new WebBrowser();
 
         private void LouisForm_Load(object sender, EventArgs e)
         {
@@ -52,8 +54,8 @@ namespace Louis_Vuitton
 
                 //Image Link
                 handbags.ElementAt(i).ProductImage = productImageLinks.ElementAt(i).Attributes["data-src"].Value;
-                handbags.ElementAt(i).ProductImage = handbags.ElementAt(i).ProductImage.Replace("IMG_WIDTH", "360");
-                handbags.ElementAt(i).ProductImage = handbags.ElementAt(i).ProductImage.Replace("IMG_HEIGHT", "360");
+                handbags.ElementAt(i).ProductImage = handbags.ElementAt(i).ProductImage.Replace("{IMG_WIDTH}", "360");
+                handbags.ElementAt(i).ProductImage = handbags.ElementAt(i).ProductImage.Replace("{IMG_HEIGHT}", "360");
 
                 //Description
                 handbags.ElementAt(i).PageLink = "https://uk.louisvuitton.com/" + productPageLinks.ElementAt(i).Attributes["href"].Value;
@@ -62,24 +64,26 @@ namespace Louis_Vuitton
                 handbags.ElementAt(i).ProductDescription = description.InnerText;
 
                 //Availability
-                WebBrowser webBrowser = new WebBrowser();
-                webBrowser.AllowNavigation = true;
-                webBrowser.Navigate("https://uk.louisvuitton.com/eng-gb/products/pochette-metis-monogram-empreinte-nvprod630173v#M44072");
-                //string html = (webBrowser.Document as System.Windows.Forms.HtmlDocument).documentElement.innerHTML;
+
+                webBrowser.Navigate(handbags.ElementAt(i).PageLink);
+                //Out of Stock Link (for testing purposes)
+                //webBrowser.Navigate("https://uk.louisvuitton.com/eng-gb/products/pochette-metis-monogram-empreinte-nvprod630173v#M44072");
+
                 webBrowser.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(JavaScriptLoaded);
                 while (!webSiteLoaded)
                 {
                     Application.DoEvents();
                 }
-                string html = webBrowser.DocumentText;
+                var dom = (mshtml.IHTMLDocument3)webBrowser.Document.DomDocument;
+                string html = dom.documentElement.innerHTML;
+                //webBrowser.
                 //string url = webBrowser.Url;
-
-                //webPage = htmlWeb.LoadFromBrowser("https://uk.louisvuitton.com/eng-gb/products/pochette-metis-monogram-empreinte-nvprod630173v#M44072");
+                Uri url = webBrowser.Url;
                 webPage.LoadHtml(html);
                 
                 HtmlAgilityPack.HtmlNode availability = webPage.DocumentNode.SelectSingleNode("//div[@id='notInStock']");
                 if (availability.Attributes["class"].Value == "getIndexClass")
-                    handbags.ElementAt(i).Availability = availability.Attributes["data-htmlContent"].Value;
+                    handbags.ElementAt(i).Availability = "Currently out of stock online";
                 else
                     handbags.ElementAt(i).Availability = "In Stock";
             }
