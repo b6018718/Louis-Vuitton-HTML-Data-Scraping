@@ -60,7 +60,7 @@ namespace Louis_Vuitton
                 //Page Link
                 handbags.ElementAt(i).PageLink = "https://uk.louisvuitton.com/" + productPageLinks.ElementAt(i).Attributes["href"].Value;
 
-                //Navigate Browser for JavaScript
+                //Navigate Browser for JavaScript (The only way to get stock messages is using JavaScript, so the program opens an internet browser)
                 webBrowser.Navigate(handbags.ElementAt(i).PageLink);
 
                 //Out of Stock (For Testing Purposes)
@@ -83,9 +83,38 @@ namespace Louis_Vuitton
                     handbags.ElementAt(i).Availability = "Currently out of stock online";
                 else
                     handbags.ElementAt(i).Availability = "In Stock";
-            }
-        }
 
+            }
+            //DATA COLLECTED!
+            webBrowser.Dispose();
+
+            int defaultWidth = 600;
+            int defaultHeight = 500;
+            
+            //Create a box with 4 default spots + more depending on how many bags are present. 300px per 2 bags
+            int scrollBoxMaxHeight = Convert.ToInt32(defaultHeight + Math.Ceiling((Convert.ToDouble(handbags.Count()) - 4) / 2) * defaultHeight / 2);
+            Panel leftPanel = new Panel
+            {
+                Location = new Point(30, 30),
+                Size = new Size(defaultWidth, defaultHeight),
+                AutoScroll = true,
+                BackColor = Color.Gray,
+                
+            };
+            leftPanel.VerticalScroll.Visible = true;
+
+            //CheckBox checkers = new CheckBox
+            //{ Location = new Point(700, 700) };
+            //leftPanel.Controls.Add(checkers);
+            /*GroupBox leftBox = new GroupBox
+            {
+                BackColor = Color.Gray,
+                Size = new Size (defaultWidth, defaultHeight),
+            };
+            leftBox.Controls.Add(leftPanel);*/
+
+            this.Controls.Add(leftPanel);
+        }
 
         private void JavaScriptLoaded(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
