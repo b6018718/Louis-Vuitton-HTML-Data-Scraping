@@ -30,6 +30,8 @@
         {
             this.load = new System.Windows.Forms.Button();
             this.progressBar = new System.Windows.Forms.ProgressBar();
+            this.progressText = new System.Windows.Forms.Label();
+            this.stockCheckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // load
@@ -49,17 +51,39 @@
             this.progressBar.Size = new System.Drawing.Size(321, 23);
             this.progressBar.TabIndex = 1;
             // 
+            // progressText
+            // 
+            this.progressText.AutoSize = true;
+            this.progressText.Location = new System.Drawing.Point(463, 6);
+            this.progressText.Name = "progressText";
+            this.progressText.Size = new System.Drawing.Size(30, 13);
+            this.progressText.TabIndex = 2;
+            this.progressText.Text = "0 / 0";
+            // 
+            // stockCheckBox
+            // 
+            this.stockCheckBox.AutoSize = true;
+            this.stockCheckBox.Location = new System.Drawing.Point(574, 5);
+            this.stockCheckBox.Name = "stockCheckBox";
+            this.stockCheckBox.Size = new System.Drawing.Size(158, 17);
+            this.stockCheckBox.TabIndex = 3;
+            this.stockCheckBox.Text = "Get Stock Availability (Slow)";
+            this.stockCheckBox.UseVisualStyleBackColor = true;
+            // 
             // LouisForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1084, 611);
+            this.Controls.Add(this.stockCheckBox);
+            this.Controls.Add(this.progressText);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.load);
             this.Name = "LouisForm";
             this.Text = "Louis Vuitton Data Scraping";
             this.Load += new System.EventHandler(this.LouisForm_Load);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -67,6 +91,8 @@
 
         private System.Windows.Forms.Button load;
         private System.Windows.Forms.ProgressBar progressBar;
+        private System.Windows.Forms.Label progressText;
+        private System.Windows.Forms.CheckBox stockCheckBox;
     }
 }
 
