@@ -56,9 +56,9 @@
             this.progressText.AutoSize = true;
             this.progressText.Location = new System.Drawing.Point(463, 6);
             this.progressText.Name = "progressText";
-            this.progressText.Size = new System.Drawing.Size(30, 13);
+            this.progressText.Size = new System.Drawing.Size(24, 13);
             this.progressText.TabIndex = 2;
-            this.progressText.Text = "0 / 0";
+            this.progressText.Text = "0/0";
             // 
             // stockCheckBox
             // 

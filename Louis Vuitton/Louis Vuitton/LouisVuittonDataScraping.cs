@@ -16,13 +16,27 @@ namespace Louis_Vuitton
 {
     public partial class LouisForm : Form
     {
+        //Count Lines OF Code = ctrl + shift + f
+        //^(?!(\s*\*))(?!(\s*\-\-\>))(?!(\s*\<\!\-\-))(?!(\s*\n))(?!(\s*\*\/))(?!(\s*\/\*))(?!(\s*\/\/\/))(?!(\s*\/\/))(?!(\s*\}))(?!(\s*\{))(?!(\s(using))).*$
+
+        //Global Variables
+        bool webSiteLoaded = false; //Website Fully Loaded in Memory
+        bool loadedOnce = false;    //Button pressed once before during lifetime of application
+        bool productsLoaded = false;//When the user is allowed to click on the product
+
+        //Variables for the product boxes
+        int boxSize = 200;          
+        int xMargin = 40;
+        int yMargin = 50;
+        int columnDistance = 290;
+
+        //List of handbag objects generated from by Web Scraping
+        List<Handbag> handbags = new List<Handbag>();
+
         public LouisForm()
         {
             InitializeComponent();
         }
-
-        bool webSiteLoaded = false;
-        List<Handbag> handbags = new List<Handbag>();
 
         private void LouisForm_Load(object sender, EventArgs e)
         {
@@ -32,9 +46,8 @@ namespace Louis_Vuitton
 
         private GroupBox LoadProduct(Handbag handbag, int xCoord, int yCoord, int boxSize, int handbagNo)
         {
-            GroupBox groupBox = new GroupBox();
-
             //Product Image
+            GroupBox groupBox = new GroupBox();
             PictureBox pictureBox = new PictureBox();
             pictureBox.Load(handbag.ProductImage);
             pictureBox.Size = new Size(200, 200);
@@ -43,13 +56,15 @@ namespace Louis_Vuitton
             groupBox.Size = new Size(boxSize, boxSize);
             groupBox.Name = "handbagNo-" + handbagNo;
             groupBox.Controls.Add(pictureBox);
+            groupBox.Click += clickEvent;
 
             //Product Name
             var image = pictureBox.Image;
-            var font = new Font("Times New Roman", 30, FontStyle.Regular, GraphicsUnit.Pixel);
+            var font = new Font("Microsoft Sans Serif", 30, FontStyle.Regular, GraphicsUnit.Pixel);
             var graphics = Graphics.FromImage(image);
             graphics.DrawString(handbag.ProductName, font, Brushes.Black, new Point(10, 10));
             pictureBox.Image = image;
+            pictureBox.Click += clickEvent;
             return groupBox;
         }
 
@@ -60,6 +75,14 @@ namespace Louis_Vuitton
 
         private void load_Click(object sender, EventArgs e)
         {
+            //Create new thread for background work
+            if (loadedOnce)
+            {
+                EraseDisplay();
+                if (this.Controls.ContainsKey("leftPanel"))
+                    this.Controls.Remove(this.Controls["leftPanel"]);
+            }
+            loadedOnce = true;
             Thread thread = new Thread(new ThreadStart(WorkerMine_DoWork));
             thread.SetApartmentState(ApartmentState.STA);
             thread.Start();
@@ -67,14 +90,11 @@ namespace Louis_Vuitton
 
         private void LoadWebPageWithBrowser(HtmlAgilityPack.HtmlDocument webPageDesc, String url, WebBrowser webBrowser)
         {
-            
+            //Navigate Internet Explorer 11 Browser
             webSiteLoaded = false;
             webBrowser.Navigate(url);
 
-            //Out of Stock (For Testing Purposes)
-            //webBrowser.Navigate("https://uk.louisvuitton.com/eng-gb/products/pochette-metis-monogram-empreinte-nvprod630173v#M44072");
-
-            //Description
+            //Load DOM Object
             while (!webSiteLoaded)
                 Application.DoEvents();
             var dom = (mshtml.IHTMLDocument3)webBrowser.Document.DomDocument;
@@ -85,6 +105,12 @@ namespace Louis_Vuitton
         //MAIN CODE TO LOAD HANDBAGS
         private void WorkerMine_DoWork()
         {
+            //Set Progress Text to "0/0"
+            SetLabelTextDelegate setLabelTextDelegate = new SetLabelTextDelegate(SetLabelText);
+            String progressTextString = "0/0";
+            this.Invoke(setLabelTextDelegate, new object[] { "progressText", progressTextString });
+            productsLoaded = false;
+
             //Create a box with 4 default spots + more depending on how many bags are present
             WebBrowser webBrowser = new WebBrowser();
             int defaultWidth = 550;
@@ -99,14 +125,13 @@ namespace Louis_Vuitton
             };
             leftPanel.VerticalScroll.Visible = false;
 
+            //Click Event
+            this.Click += clickEvent;
+            leftPanel.Click += clickEvent;
             AddPanelDelegate addPanel = new AddPanelDelegate(AddPanel);
             this.Invoke(addPanel, new object[] { leftPanel });
 
             //Variables for item boxes
-            int boxSize = 200;
-            int xMargin = 40;
-            int yMargin = 50;
-            int columnDistance = 290;
             int xCoord = 0;
             int yCoord = 0;
 
@@ -151,7 +176,7 @@ namespace Louis_Vuitton
                 handbags.ElementAt(i).ProductName = productNames.ElementAt(i).InnerText;
 
                 //Product Price
-                handbags.ElementAt(i).ProductPrice = productPrices.ElementAt(i).InnerText;
+                handbags.ElementAt(i).ProductPrice = productPrices.ElementAt(i).Attributes["data-htmlContent"].Value;
 
                 //Product Code
                 handbags.ElementAt(i).ProductCode = productPageLinks.ElementAt(i).Attributes["data-sku"].Value;
@@ -173,7 +198,10 @@ namespace Louis_Vuitton
 
                 HtmlAgilityPack.HtmlNode description = webPageDesc.DocumentNode.SelectSingleNode("//div[@class='productDescription description-push-text onlyML ppTextDescription ']");
                 if (description != null)
+                {
                     handbags.ElementAt(i).ProductDescription = description.InnerText;
+                    handbags.ElementAt(i).ProductDescription = handbags.ElementAt(i).ProductDescription.Remove(0, 15);
+                }
 
                 //Handbag Availability
                 if (getStock)
@@ -203,8 +231,7 @@ namespace Louis_Vuitton
                 this.Invoke(updatePanelDelegate, new object[] { "leftPanel", handbags.ElementAt(i), xCoord, yCoord, boxSize, i });
 
                 //Progress Text
-                String progressTextString = (i + 1) + "/" + productNames.Count;
-                SetLabelTextDelegate setLabelTextDelegate = new SetLabelTextDelegate(SetLabelText);
+                progressTextString = (i + 1) + "/" + productNames.Count;
                 VoidDelegate progressStep = new VoidDelegate(ProgressStep);
                 this.Invoke(setLabelTextDelegate, new object[] { "progressText", progressTextString });
                 this.Invoke(progressStep);
@@ -215,6 +242,7 @@ namespace Louis_Vuitton
             this.Invoke(endProgressBar);
             webBrowser.Dispose();
             webSiteLoaded = false;
+            productsLoaded = true;
         }
 
         private void InitialseProgressBar(int numberOfSteps)
@@ -236,6 +264,7 @@ namespace Louis_Vuitton
         }
         private void SetProgressStep(int itemCount)
         {
+            progressBar.Value = 0;
             progressBar.Step = 100 / (itemCount + 1);
         }
         private void ProgressStep()
@@ -259,5 +288,130 @@ namespace Louis_Vuitton
             panelToEdit.VerticalScroll.Visible = true;
         }
 
+        private void clickEvent(object sender, EventArgs e)
+        {
+            if (productsLoaded)
+            {
+                Panel clickPanel = (Panel) this.Controls["leftPanel"];
+                Point point = clickPanel.PointToClient(Cursor.Position);
+                int abX = clickPanel.AutoScrollPosition.X * -1;
+                int abY = clickPanel.AutoScrollPosition.Y * -1;
+                point.Offset(new Point(abX, abY));
+                int xTopCoord = 0;
+                int yTopCoord = 0;
+                int xBottonCoord = 0;
+                int yBottomCoord = 0;
+                for (int i = 0; i < handbags.Count; i++)
+                {
+                    int rowNumber = Convert.ToInt32(Math.Floor(Convert.ToDouble(i) / 2));
+                    yTopCoord = yMargin + rowNumber * boxSize + yMargin * rowNumber;
+                    yBottomCoord = yMargin + rowNumber * boxSize + yMargin * rowNumber + boxSize;
+                    if (i % 2 == 0)
+                    {
+                        xTopCoord = xMargin;
+                        xBottonCoord = xMargin + boxSize;
+                    }
+                    else
+                    {
+                        xTopCoord = columnDistance;
+                        xBottonCoord = columnDistance + boxSize;
+                    }
+
+                    //Check for collision
+                    if (point.X >= xTopCoord && point.X <= xBottonCoord && point.Y >= yTopCoord && point.Y <= yBottomCoord)
+                    {
+                        //Get rid of current labels & picture boxes
+                        EraseDisplay();
+
+                        //Image
+                        PictureBox pictureBox = new PictureBox();
+                        pictureBox.Load(handbags.ElementAt(i).ProductImage);
+                        pictureBox.Size = new Size(306, 306);
+                        pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
+                        pictureBox.Location = new Point(600, 50);
+                        pictureBox.Name = "bigPicture";
+                        this.Controls.Add(pictureBox);
+
+                        //Font
+                        Font sans = new Font("Microsoft Sans Serif", 10, FontStyle.Regular);
+
+                        //Name
+                        Label name = new Label
+                        {
+                            Name = "bigName",
+                            Text = handbags.ElementAt(i).ProductName,
+                            Location = new Point(600, 370),
+                            Font = sans,
+                            AutoSize = true,
+                        };
+                        this.Controls.Add(name);
+
+                        //Product Code
+                        Label code = new Label
+                        {
+                            Name = "bigCode",
+                            Text = handbags.ElementAt(i).ProductCode,
+                            Location = new Point(600, 390),
+                            Font = sans,
+                            AutoSize = true,
+                        };
+                        this.Controls.Add(code);
+
+                        //Price
+                        Label price = new Label()
+                        {
+                            Name = "bigPrice",
+                            Text = handbags.ElementAt(i).ProductPrice,
+                            Location = new Point(600, 410),
+                            Font = sans,
+                            AutoSize = true,
+                        };
+                        this.Controls.Add(price);
+
+                        //Availability
+                        if (handbags.ElementAt(i).Availability != null)
+                        {
+                            Label availability = new Label()
+                            {
+                                Name = "bigAvailability",
+                                Text = handbags.ElementAt(i).Availability,
+                                Location = new Point(600, 430),
+                                Font = sans,
+                                AutoSize = true,
+                            };
+                            this.Controls.Add(availability);
+                        }
+
+                        //Product Description
+                        Label description = new Label()
+                        {
+                            Name = "bigDescription",
+                            Text = handbags.ElementAt(i).ProductDescription,
+                            Location = new Point(600, 450),
+                            AutoSize = true,
+                            MaximumSize = new Size(360,0),
+                            Font = sans,
+                        };
+                        this.Controls.Add(description);
+                    }
+                }
+            }
+        }
+
+        private void EraseDisplay()
+        {
+            if (this.Controls.ContainsKey("bigName"))
+                this.Controls.Remove(this.Controls["bigName"]);
+            if (this.Controls.ContainsKey("bigCode"))
+                this.Controls.Remove(this.Controls["bigCode"]);
+            if (this.Controls.ContainsKey("bigPicture"))
+                this.Controls.Remove(this.Controls["bigPicture"]);
+            if (this.Controls.ContainsKey("bigDescription"))
+                this.Controls.Remove(this.Controls["bigDescription"]);
+            if (this.Controls.ContainsKey("bigPrice"))
+                this.Controls.Remove(this.Controls["bigPrice"]);
+            if (this.Controls.ContainsKey("bigAvailability"))
+                this.Controls.Remove(this.Controls["bigAvailability"]);
+        }
     }
 }
